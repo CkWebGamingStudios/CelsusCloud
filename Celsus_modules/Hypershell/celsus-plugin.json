@@ -1,0 +1,7 @@
+﻿{
+  "id": "Hypershell",
+  "name": "Hypershell",
+  "version": "1.0.1",
+  "description": "Improved shell interface plugin",
+  "entry": "src/index.js"
+}

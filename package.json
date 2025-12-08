@@ -1,1 +1,33 @@
-{"name":"celsus-cloud","version":"1.0.0","type": "module","description":"Celsus Cloud Plugin Registry hosted on Cloudflare Pages.","scripts":{"dev":"wrangler pages dev ./public","deploy":"wrangler pages deploy ./public"},"devDependencies":{"wrangler":"^3.0.0"},"main":"index.js","repository":{"type":"git","url":"git+https://github.com/CkWebGamingStudios/celsus-cloud.git"},"keywords":[],"author":"","license":"ISC","type":"commonjs","bugs":{"url":"https://github.com/CkWebGamingStudios/celsus-cloud/issues"},"homepage":"https://github.com/CkWebGamingStudios/celsus-cloud#readme"}
+{
+  "name": "celsus-cloud",
+  "version": "1.0.0",
+  "description": "Celsus Cloud plugin registry and installer system",
+  "main": "functions/api/plugins.js",
+  "type": "module",
+  "scripts": {
+    "start": "node functions/api/plugins.js",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.16",
+    "fs-extra": "^11.2.0",
+    "node-fetch": "^3.3.2",
+    "vite": "^5.2.0"
+  },
+  "keywords": [
+    "celsus",
+    "plugin",
+    "cloud",
+    "registry"
+  ],
+  "author": "CkWebGamingStudios",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CkWebGamingStudios/celsus-cloud.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CkWebGamingStudios/celsus-cloud/issues"
+  },
+  "homepage": "https://github.com/CkWebGamingStudios/celsus-cloud#readme"
+}

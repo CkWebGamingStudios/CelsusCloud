@@ -3,14 +3,44 @@ import path from "path";
 import fetch from "node-fetch";
 import AdmZip from "adm-zip";
 
-const registryUrl =
-  "https://celsus-cloud.pages.dev/plugins.json";
+const REGISTRY_URL =
+  "https://celsus-cloud.ckwebgamingstudios.pages.dev/functions/api/plugins.json";
 
 async function installPlugin(pluginName) {
+  // Special case: developer template
+  if (pluginName === "dev") {
+    const targetPath = process.argv[3];
+    if (!targetPath) {
+      console.error("⚙️ Usage: celsus install dev <target-folder>");
+      process.exit(1);
+    }
+
+    const templateDir = path.join(
+      process.cwd(),
+      "cli_installer",
+      "templates",
+      "dev_plugin"
+    );
+    const outputDir = path.resolve(targetPath);
+
+    if (!fs.existsSync(templateDir)) {
+      console.error("❌ Dev template not found in templates/dev_plugin/");
+      process.exit(1);
+    }
+
+    // Copy template folder
+    fs.mkdirSync(outputDir, { recursive: true });
+    fs.cpSync(templateDir, outputDir, { recursive: true });
+
+    console.log(`✅ Dev template created successfully at: ${outputDir}`);
+    console.log("🧩 You can now build your own plugin inside this folder!");
+    return;
+  }
+
+  // =============== Normal plugin install logic =================
   console.log(`🔍 Searching for plugin "${pluginName}"...`);
 
-  // Fetch plugin registry
-  const res = await fetch(registryUrl);
+  const res = await fetch(REGISTRY_URL);
   const registry = await res.json();
   const plugin = registry.plugins.find(
     (p) => p.id.toLowerCase() === pluginName.toLowerCase()
@@ -23,12 +53,12 @@ async function installPlugin(pluginName) {
 
   console.log(`⬇️  Downloading ${plugin.name} v${plugin.version}...`);
   const zipResponse = await fetch(plugin.url);
-  if (!zipResponse.ok) throw new Error("Download failed: " + zipResponse.statusText);
+  if (!zipResponse.ok)
+    throw new Error("Download failed: " + zipResponse.statusText);
 
   const arrayBuffer = await zipResponse.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
-  // Setup directories
   const celsusDir = path.join(process.cwd(), "Celsus_modules");
   const pluginDir = path.join(celsusDir, plugin.name);
 
@@ -46,13 +76,15 @@ async function installPlugin(pluginName) {
     return;
   }
 
-  // Merge folders (public/src)
+  // Merge public/src if exists
   const publicFolder = path.join(pluginDir, "public");
   const srcFolder = path.join(pluginDir, "src");
 
   if (fs.existsSync(publicFolder)) {
     console.log("📁 Merging /public...");
-    fs.cpSync(publicFolder, path.join(process.cwd(), "public"), { recursive: true });
+    fs.cpSync(publicFolder, path.join(process.cwd(), "public"), {
+      recursive: true,
+    });
   }
 
   if (fs.existsSync(srcFolder)) {
@@ -60,7 +92,7 @@ async function installPlugin(pluginName) {
     fs.cpSync(srcFolder, path.join(process.cwd(), "src"), { recursive: true });
   }
 
-  // Update registry.json
+  // Update local registry
   const localRegistryPath = path.join(celsusDir, "registry.json");
   let localRegistry = [];
 
@@ -82,35 +114,17 @@ async function installPlugin(pluginName) {
 
   fs.writeFileSync(localRegistryPath, JSON.stringify(localRegistry, null, 2));
 
-  // Cleanup
   fs.unlinkSync(tempZip);
-
   console.log(`✅ Installed ${plugin.name} v${plugin.version} successfully!`);
   console.log(`📂 Location: ${pluginDir}`);
 }
 
 const pluginName = process.argv[2];
 if (!pluginName) {
-  console.log("⚙️ Usage: node celsus-install.mjs <plugin-name>");
+  console.log("⚙️ Usage: celsus install <plugin-name>");
   process.exit(1);
 }
 
-// choose correct registry URL
-const LOCAL_REGISTRY = "file:///E:/Projects/celsus-cloud/functions/api/plugins.json";
-const CLOUD_REGISTRY = "https://celsus-cloud.pages.dev/plugins.json";
-
-let REGISTRY_URL = CLOUD_REGISTRY;
-
-try {
-  const res = await fetch(REGISTRY_URL);
-  if (!res.ok) throw new Error("Cloud unreachable");
-} catch {
-  console.warn("⚠️ Using local registry instead.");
-  REGISTRY_URL = LOCAL_REGISTRY;
-}
-
-// Run installer
-installPlugin(pluginName)
-  .then(() => console.log("🎉 Installation process complete."))
-  .catch((err) => console.error("❌ Installer failed:", err));
-
+installPlugin(pluginName).catch((err) =>
+  console.error("❌ Installer failed:", err)
+);

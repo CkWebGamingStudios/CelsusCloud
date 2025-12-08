@@ -1,0 +1,7 @@
+{
+  "id": "DevPlugin",
+  "name": "Celsus Plugin Template",
+  "version": "0.1.0",
+  "description": "Starter template for building Celsus plugins.",
+  "entry": "./src/index.js"
+}
