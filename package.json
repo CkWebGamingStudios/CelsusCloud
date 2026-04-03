@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node functions/api/plugins.js",
-    "build": "vite build"
+    "build": "npx vite build"
   },
   "dependencies": {
     "adm-zip": "^0.5.16",
